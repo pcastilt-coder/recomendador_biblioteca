@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Qué leo hoy? · Biblioteca Ulima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lusitana:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+ :root{--orange:#FF5117;--black:#000;--white:#fff;--gray:#97999B;--panel:#0d0d0d;--line:#1e1e1e;}
+ *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+ html,body{height:100%;}body{background:var(--black);color:#fff;font-family:'Roboto',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;}
+ #app{height:100vh;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:clamp(20px,4vw,48px);}
+ header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line);flex:0 0 auto;}
+ .brand{font-size:clamp(13px,1.4vw,16px);letter-spacing:.14em;color:var(--gray);font-weight:500;}.brand b{color:var(--orange);font-weight:700;}
+ .progress{display:flex;gap:10px;}.dot{width:12px;height:12px;border-radius:50%;background:var(--line);transition:.3s;}.dot.active{background:var(--orange);transform:scale(1.25);}.dot.done{background:var(--gray);}
+ main{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;position:relative;}
+ .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .35s,transform .35s,visibility .35s;overflow-y:auto;}
+ .scene.show{opacity:1;visibility:visible;transform:translateY(0);}
+ .hero-title{font-family:'Lusitana',serif;font-weight:700;line-height:.98;font-size:clamp(52px,10vw,120px);letter-spacing:-.01em;}.hero-title .q{color:var(--orange);}
+ .hero-sub{margin-top:22px;color:var(--gray);font-size:clamp(16px,2vw,22px);max-width:44ch;font-weight:300;}
+ .hero-actions{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap;}
+ .cta{background:var(--orange);color:#fff;border:none;font-weight:700;font-size:clamp(18px,2.2vw,24px);padding:20px 46px;border-radius:999px;cursor:pointer;transition:transform .15s;}
+ .cta:active{transform:scale(.96);}.cta.ghost{background:transparent;border:1.5px solid var(--gray);font-weight:500;}
+ .q-step{color:var(--orange);font-weight:700;letter-spacing:.16em;font-size:14px;margin-bottom:14px;}
+ .q-title{font-family:'Lusitana',serif;font-size:clamp(30px,5.2vw,60px);line-height:1.02;margin-bottom:clamp(24px,3.4vw,40px);}
+ .options{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.6vw,18px);}.options.tri{grid-template-columns:repeat(3,1fr);}
+ .opt{background:var(--panel);border:1px solid var(--line);color:#fff;text-align:left;padding:clamp(20px,2.6vw,30px);border-radius:16px;cursor:pointer;font-size:clamp(18px,2.2vw,26px);font-weight:500;transition:.12s;display:flex;align-items:center;gap:16px;min-height:96px;}
+ .opt:active{transform:scale(.98);}.opt:hover{border-color:var(--orange);}.opt .ico{font-size:1.5em;flex:0 0 auto;}.opt .lbl{display:flex;flex-direction:column;}.opt .lbl small{color:var(--gray);font-size:.62em;font-weight:400;margin-top:4px;}
+ .area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
+ .area-chip{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--orange);color:#fff;text-align:left;padding:18px 20px;border-radius:12px;cursor:pointer;transition:.15s;}
+ .area-chip:hover{border-color:var(--orange);transform:translateY(-2px);}
+ .area-chip b{font-family:'Lusitana',serif;font-weight:400;font-size:18px;display:block;}.area-chip span{color:var(--gray);font-size:12px;}
+ .area-chip.especial{background:linear-gradient(135deg,rgba(255,81,23,.18),var(--panel));border-left-width:5px;}
+ .browse-list{display:flex;flex-direction:column;gap:12px;}
+ .brow{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s;align-items:center;}
+ .brow:hover{border-color:var(--orange);}.brow .mini{width:40px;height:58px;border-radius:5px;flex:0 0 auto;background:linear-gradient(155deg,#1a1a1a,#060606);border-left:3px solid var(--orange);}
+ .brow .bi{min-width:0;flex:1;}.brow .bi strong{font-family:'Lusitana',serif;font-weight:400;font-size:16px;display:block;}.brow .bi span{color:var(--gray);font-size:13px;font-weight:300;}.brow .bf{font-size:12px;color:var(--orange);font-weight:600;flex:0 0 auto;}
+ .result-head{color:var(--gray);font-size:clamp(14px,1.6vw,18px);margin-bottom:18px;font-weight:300;}
+ .pick{display:grid;grid-template-columns:auto 1fr;gap:clamp(22px,3vw,40px);align-items:start;}
+ .cover{width:clamp(150px,20vw,230px);aspect-ratio:2/3;border-radius:10px;overflow:hidden;flex:0 0 auto;background:linear-gradient(155deg,#1a1a1a,#060606);border-left:4px solid var(--orange);display:flex;flex-direction:column;justify-content:flex-end;padding:18px;}
+ .cover .cae{color:var(--orange);font-size:12px;font-weight:600;margin-bottom:auto;}.cover .ct{font-family:'Lusitana',serif;font-size:clamp(16px,1.7vw,21px);line-height:1.18;}.cover .ca{color:var(--gray);font-size:12px;margin-top:10px;font-weight:300;}
+ .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}.badge{font-size:13px;font-weight:500;color:#000;background:var(--orange);padding:5px 12px;border-radius:999px;}.badge.soft{background:transparent;color:var(--gray);border:1px solid var(--line);}
+ .pick-title{font-family:'Lusitana',serif;font-size:clamp(28px,4vw,46px);line-height:1.03;}.pick-author{color:var(--gray);font-size:clamp(15px,1.8vw,20px);margin-top:6px;font-weight:300;}
+ .avail{margin-top:24px;display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:#fff;text-decoration:none;font-weight:700;font-size:clamp(15px,1.7vw,19px);padding:15px 30px;border-radius:999px;transition:transform .15s;}.avail:active{transform:scale(.96);}
+ .alts{margin-top:clamp(22px,3vw,34px);border-top:1px solid var(--line);padding-top:20px;}.alts h4{color:var(--gray);font-weight:400;font-size:14px;margin-bottom:14px;}
+ .alt-row{display:flex;gap:16px;}.alt{flex:1;display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;align-items:center;min-width:0;}.alt:hover{border-color:var(--orange);}
+ .alt .mini{width:46px;height:66px;border-radius:5px;flex:0 0 auto;background:linear-gradient(155deg,#1a1a1a,#060606);border-left:3px solid var(--orange);}
+ .alt-info{min-width:0;}.alt-info strong{font-family:'Lusitana',serif;font-weight:400;font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.alt-info span{color:var(--gray);font-size:13px;font-weight:300;}
+ .footer-actions{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap;}
+ .loading{color:var(--gray);font-size:20px;font-weight:300;}
+ @media (max-width:720px){.options,.options.tri{grid-template-columns:1fr;}.pick{grid-template-columns:1fr;}.cover{width:clamp(120px,40vw,170px);}.alt-row{flex-direction:column;}}
+</style></head><body>
+<div id="app"><header><div class="brand">BIBLIOTECA <b>ULIMA</b></div><div class="progress" id="progress"></div></header><main id="main"></main></div>
+<script>
+const Q={
+ animo:{titulo:"¿Qué buscas hoy?",cols:2,ops:[{v:"entretener",ico:"🎬",lbl:"Entretenerme",sub:"pasar un buen rato"},{v:"emocionar",ico:"💥",lbl:"Emocionarme",sub:"algo que me remueva"},{v:"reflexionar",ico:"🌀",lbl:"Reflexionar",sub:"pensar a fondo"},{v:"sanar",ico:"🌱",lbl:"Sanar y crecer",sub:"bienestar y crecimiento"}]},
+ ambito:{titulo:"¿En qué ámbito deseas crecer?",cols:3,ops:[{v:"emocional",ico:"🧠",lbl:"Emocional y relaciones",sub:"conmigo y con los demás"},{v:"espiritual",ico:"🧘",lbl:"Espiritual",sub:"sentido y propósito"},{v:"profesional",ico:"💼",lbl:"Profesional",sub:"trabajo y liderazgo"}]},
+ tipo:{titulo:"¿Reales o imaginadas?",cols:3,ops:[{v:"real",ico:"🗺️",lbl:"Historias reales",sub:""},{v:"ficcion",ico:"✨",lbl:"Ficción",sub:""},{v:"poesia",ico:"🕊️",lbl:"Poesía",sub:""}]},
+ epoca:{titulo:"¿Reciente o un clásico?",cols:3,ops:[{v:"reciente",ico:"🆕",lbl:"Algo reciente",sub:"últimos años"},{v:"clasico",ico:"🏛️",lbl:"Un clásico",sub:""},{v:"cualquiera",ico:"🤷",lbl:"Me da igual",sub:""}]},
+ formato:{titulo:"¿Cómo lo prefieres?",cols:3,ops:[{v:"fisico",ico:"📖",lbl:"Físico",sub:"llevármelo"},{v:"virtual",ico:"💻",lbl:"Virtual",sub:"al instante"},{v:"cualquiera",ico:"🤷",lbl:"Me da igual",sub:""}]}};
+const NF={fisico:"Físico",virtual:"Virtual",ambos:"Físico y virtual"},NT={real:"No ficción",ficcion:"Ficción",poesia:"Poesía"},NE={reciente:"Reciente",medio:"",clasico:"Clásico"};
+let paso=0,respuestas={},rama=[],ri=0,total=4,origen='inicio',idle=null,AREAS=[];
+const main=document.getElementById('main'),progressEl=document.getElementById('progress');
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function resetIdle(){clearTimeout(idle);if(paso!==0)idle=setTimeout(irInicio,90000);}
+document.addEventListener('pointerdown',resetIdle);
+function computeAreas(){const c={};CATALOGO.forEach(l=>{if(l.area)c[l.area]=(c[l.area]||0)+1;});AREAS=Object.keys(c).map(n=>({n,c:c[n]})).sort((a,b)=>b.c-a.c);}
+function progreso(){progressEl.innerHTML='';if(paso<1||paso>4)return;for(let i=1;i<=total;i++){const d=document.createElement('div');d.className='dot'+(i===paso?' active':(i<paso?' done':''));progressEl.appendChild(d);}}
+function scene(h){main.innerHTML='<div class="scene" id="sc">'+h+'</div>';requestAnimationFrame(()=>document.getElementById('sc').classList.add('show'));progreso();resetIdle();}
+function irInicio(){paso=0;respuestas={};rama=[];ri=0;origen='inicio';clearTimeout(idle);
+ scene('<h1 class="hero-title"><span class="q">¿Qué</span> leo hoy?</h1><p class="hero-sub">Responde unas preguntas rápidas y te recomendamos un libro, o explora directamente por área.</p><div class="hero-actions"><button class="cta" onclick="irQuiz()">Comenzar</button><button class="cta ghost" onclick="irExplorar()">Explorar por área</button></div>');}
+function irQuiz(){respuestas={};origen='quiz';rama=[];ri=0;total=4;renderQ('animo',1);}
+function renderQ(key,idx){paso=idx;const q=Q[key];const o=q.ops.map(op=>'<button class="opt" onclick="elegir(\''+key+'\',\''+op.v+'\')"><span class="ico">'+op.ico+'</span><span class="lbl">'+op.lbl+(op.sub?'<small>'+op.sub+'</small>':'')+'</span></button>').join('');
+ scene('<div class="q-step">PREGUNTA '+idx+' DE '+total+'</div><h2 class="q-title">'+q.titulo+'</h2><div class="options '+(q.cols===3?'tri':'')+'">'+o+'</div>');}
+function elegir(key,val){respuestas[key]=val;
+ if(key==='animo'){rama=(val==='sanar')?['ambito','formato']:(val==='reflexionar')?['epoca','formato']:['tipo','epoca','formato'];total=1+rama.length;ri=0;avanzar();}
+ else{ri++;avanzar();}}
+function avanzar(){if(ri>=rama.length){origen='quiz';irResultado();return;}renderQ(rama[ri],2+ri);}
+function irExplorar(){paso=6;origen='explorar';const mc=CATALOGO.filter(l=>l.mujer).length;
+ let chips='';if(mc)chips+='<button class="area-chip especial" onclick="verMujer()"><b>Mujer y género</b><span>'+mc+' libros</span></button>';
+ chips+=AREAS.map((a,i)=>'<button class="area-chip" onclick="verAreaIdx('+i+')"><b>'+esc(a.n)+'</b><span>'+a.c+' libros</span></button>').join('');
+ scene('<div class="q-step">EXPLORAR</div><h2 class="q-title">¿De qué te gustaría leer?</h2><div class="area-grid">'+chips+'</div><div class="footer-actions"><button class="cta ghost" onclick="irInicio()">← Inicio</button></div>');}
+function listaHTML(libros){return libros.map(l=>'<div class="brow" onclick="verLibro(\''+l.id+'\')"><div class="mini"></div><div class="bi"><strong>'+esc(l.titulo)+'</strong><span>'+esc(l.autor||'Autoría no especificada')+(l.anio?' · '+l.anio:'')+'</span></div><div class="bf">'+NF[l.formato]+'</div></div>').join('');}
+function verAreaIdx(i){paso=6;const area=AREAS[i].n;origen='area:'+i;
+ scene('<div class="q-step">'+esc(area).toUpperCase()+'</div><h2 class="q-title">Una muestra para ti</h2><div class="browse-list">'+listaHTML(shuffle(CATALOGO.filter(l=>l.area===area)).slice(0,14))+'</div><div class="footer-actions"><button class="cta ghost" onclick="irExplorar()">← Áreas</button></div>');}
+function verMujer(){paso=6;origen='mujer';
+ scene('<div class="q-step">MUJER Y GÉNERO</div><h2 class="q-title">Una muestra para ti</h2><div class="browse-list">'+listaHTML(shuffle(CATALOGO.filter(l=>l.mujer)).slice(0,16))+'</div><div class="footer-actions"><button class="cta ghost" onclick="irExplorar()">← Áreas</button></div>');}
+function puntuar(l){let s=0;
+ if(respuestas.tipo){if(respuestas.tipo===l.tipo)s+=2;}
+ if('epoca' in respuestas){if(respuestas.epoca==='cualquiera')s+=1;else if(respuestas.epoca===l.epoca)s+=1;else if(l.epoca==='medio')s+=0.5;}
+ if(respuestas.formato){if(respuestas.formato==='cualquiera'||l.formato==='ambos'||l.formato===respuestas.formato)s+=1;}
+ return s;}
+function portada(l){return '<div class="cover">'+(l.area?'<div class="cae">'+esc(l.area)+'</div>':'')+'<div class="ct">'+esc(l.titulo)+'</div>'+(l.autor?'<div class="ca">'+esc(l.autor)+'</div>':'')+'</div>';}
+function volverBtn(){if(origen&&origen.indexOf('area:')===0)return '<button class="cta ghost" onclick="verAreaIdx('+origen.slice(5)+')">← Volver</button>';if(origen==='mujer')return '<button class="cta ghost" onclick="verMujer()">← Volver</button>';return '<button class="cta ghost" onclick="irInicio()">Volver a empezar</button>';}
+function tarjeta(l,head){
+ const ep=NE[l.epoca]?'<span class="badge soft">'+NE[l.epoca]+(l.anio?' · '+l.anio:'')+'</span>':(l.anio?'<span class="badge soft">'+l.anio+'</span>':'');
+ const ab=l.area?'<span class="badge soft">'+esc(l.area)+'</span>':'';
+ let base=l.sanar?CATALOGO.filter(x=>x.sanar&&x.id!==l.id&&(l.ambito?x.ambito===l.ambito:true)):CATALOGO.filter(x=>x.id!==l.id&&x.area===l.area);
+ let cand=shuffle(base).slice(0,2);
+ if(cand.length<2){const ex=shuffle(CATALOGO.filter(x=>x.id!==l.id&&!cand.includes(x)));cand=cand.concat(ex).slice(0,2);}
+ const alts=cand.map(a=>'<div class="alt" onclick="verLibro(\''+a.id+'\')"><div class="mini"></div><div class="alt-info"><strong>'+esc(a.titulo)+'</strong><span>'+esc(a.area||a.autor||'—')+'</span></div></div>').join('');
+ return '<div class="result-head">'+head+'</div><div class="pick">'+portada(l)+'<div class="pick-body"><div class="badges"><span class="badge">'+NF[l.formato]+'</span><span class="badge soft">'+NT[l.tipo]+'</span>'+ab+ep+'</div><h2 class="pick-title">'+esc(l.titulo)+'</h2><div class="pick-author">'+esc(l.autor||'Autoría no especificada')+'</div><a class="avail" href="'+l.enlace+'" target="_blank" rel="noopener">Ver disponibilidad →</a><div class="alts"><h4>También podrían interesarte</h4><div class="alt-row">'+alts+'</div></div></div></div><div class="footer-actions">'+volverBtn()+'</div>';}
+function irResultado(){paso=5;let pool=(respuestas.animo==='sanar')?CATALOGO.filter(l=>l.sanar&&(!respuestas.ambito||l.ambito===respuestas.ambito)):CATALOGO.filter(l=>l.animo&&l.animo.includes(respuestas.animo));if(!pool.length)pool=CATALOGO;const o=pool.map(l=>({l,s:puntuar(l),r:Math.random()})).sort((a,b)=>b.s-a.s||b.r-a.r);scene(tarjeta(o[0].l,'Para ti, hoy, te recomendamos'));}
+function verLibro(id){paso=5;scene(tarjeta(CATALOGO.find(x=>x.id===id),'Estás viendo'));}
+let CATALOGO=[];
+scene('<div class="loading">Cargando el catálogo…</div>');
+fetch('./catalogo_ulima.json').then(r=>r.json()).then(d=>{CATALOGO=d;computeAreas();irInicio();}).catch(e=>{main.innerHTML='<p class="loading">No se pudo cargar el catálogo. Verifica que <b>catalogo_ulima.json</b> esté en la misma carpeta y que la página se abra desde un servidor web (no con doble clic).</p>';});
+</script></body></html>

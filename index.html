@@ -84,11 +84,33 @@ function verAreaIdx(i){paso=6;const area=AREAS[i].n;origen='area:'+i;
  scene('<div class="q-step">'+esc(area).toUpperCase()+'</div><h2 class="q-title">Una muestra para ti</h2><div class="browse-list">'+listaHTML(shuffle(CATALOGO.filter(l=>l.area===area)).slice(0,14))+'</div><div class="footer-actions"><button class="cta ghost" onclick="irExplorar()">← Áreas</button></div>');}
 function verMujer(){paso=6;origen='mujer';
  scene('<div class="q-step">MUJER Y GÉNERO</div><h2 class="q-title">Una muestra para ti</h2><div class="browse-list">'+listaHTML(shuffle(CATALOGO.filter(l=>l.mujer)).slice(0,16))+'</div><div class="footer-actions"><button class="cta ghost" onclick="irExplorar()">← Áreas</button></div>');}
-function puntuar(l){let s=0;
- if(respuestas.tipo){if(respuestas.tipo===l.tipo)s+=2;}
- if('epoca' in respuestas){if(respuestas.epoca==='cualquiera')s+=1;else if(respuestas.epoca===l.epoca)s+=1;else if(l.epoca==='medio')s+=0.5;}
- if(respuestas.formato){if(respuestas.formato==='cualquiera'||l.formato==='ambos'||l.formato===respuestas.formato)s+=1;}
- return s;}
+function recomendar(){
+ var r=respuestas,rnd=a=>a[Math.floor(Math.random()*a.length)];
+ if(r.animo==='sanar'){
+  var p=CATALOGO.filter(l=>l.sanar&&(!r.ambito||l.ambito===r.ambito));
+  if(!p.length)p=CATALOGO.filter(l=>l.sanar);
+  var ff=p.filter(l=>!r.formato||r.formato==='cualquiera'||l.formato===r.formato||l.formato==='ambos');
+  if(ff.length)p=ff;
+  return rnd(p);
+ }
+ var enB=l=>l.animo&&l.animo.includes(r.animo),
+  okT=l=>!r.tipo||l.tipo===r.tipo,
+  okF=l=>!r.formato||r.formato==='cualquiera'||l.formato===r.formato||l.formato==='ambos',
+  okE=l=>!r.epoca||r.epoca==='cualquiera'||l.epoca===r.epoca,
+  elegible=CATALOGO.filter(l=>l.animo&&['entretener','emocionar','reflexionar'].some(a=>l.animo.includes(a))),
+  tiers=[
+   l=>enB(l)&&okT(l)&&okF(l)&&okE(l),
+   l=>enB(l)&&okT(l)&&okF(l),
+   l=>okT(l)&&okF(l)&&okE(l),
+   l=>okT(l)&&okF(l),
+   l=>okT(l),
+   l=>enB(l)&&okF(l),
+   l=>okF(l),
+   ()=>true
+  ];
+ for(var i=0;i<tiers.length;i++){var s=elegible.filter(tiers[i]);if(s.length)return rnd(s);}
+ return rnd(elegible);
+}
 function portada(l){return '<div class="cover">'+(l.area?'<div class="cae">'+esc(l.area)+'</div>':'')+'<div class="ct">'+esc(l.titulo)+'</div>'+(l.autor?'<div class="ca">'+esc(l.autor)+'</div>':'')+'</div>';}
 function volverBtn(){if(origen&&origen.indexOf('area:')===0)return '<button class="cta ghost" onclick="verAreaIdx('+origen.slice(5)+')">← Volver</button>';if(origen==='mujer')return '<button class="cta ghost" onclick="verMujer()">← Volver</button>';return '<button class="cta ghost" onclick="irInicio()">Volver a empezar</button>';}
 function tarjeta(l,head){
@@ -99,7 +121,7 @@ function tarjeta(l,head){
  if(cand.length<2){const ex=shuffle(CATALOGO.filter(x=>x.id!==l.id&&!cand.includes(x)));cand=cand.concat(ex).slice(0,2);}
  const alts=cand.map(a=>'<div class="alt" onclick="verLibro(\''+a.id+'\')"><div class="mini"></div><div class="alt-info"><strong>'+esc(a.titulo)+'</strong><span>'+esc(a.area||a.autor||'—')+'</span></div></div>').join('');
  return '<div class="result-head">'+head+'</div><div class="pick">'+portada(l)+'<div class="pick-body"><div class="badges"><span class="badge">'+NF[l.formato]+'</span><span class="badge soft">'+NT[l.tipo]+'</span>'+ab+ep+'</div><h2 class="pick-title">'+esc(l.titulo)+'</h2><div class="pick-author">'+esc(l.autor||'Autoría no especificada')+'</div><a class="avail" href="'+l.enlace+'" target="_blank" rel="noopener">Ver disponibilidad →</a><div class="alts"><h4>También podrían interesarte</h4><div class="alt-row">'+alts+'</div></div></div></div><div class="footer-actions">'+volverBtn()+'</div>';}
-function irResultado(){paso=5;let pool=(respuestas.animo==='sanar')?CATALOGO.filter(l=>l.sanar&&(!respuestas.ambito||l.ambito===respuestas.ambito)):CATALOGO.filter(l=>l.animo&&l.animo.includes(respuestas.animo));if(!pool.length)pool=CATALOGO;const o=pool.map(l=>({l,s:puntuar(l),r:Math.random()})).sort((a,b)=>b.s-a.s||b.r-a.r);scene(tarjeta(o[0].l,'Para ti, hoy, te recomendamos'));}
+function irResultado(){paso=5;scene(tarjeta(recomendar(),'Para ti, hoy, te recomendamos'));}
 function verLibro(id){paso=5;scene(tarjeta(CATALOGO.find(x=>x.id===id),'Estás viendo'));}
 let CATALOGO=[];
 scene('<div class="loading">Cargando el catálogo…</div>');

@@ -12,7 +12,7 @@
  .brand{font-size:clamp(13px,1.4vw,16px);letter-spacing:.14em;color:var(--gray);font-weight:500;}.brand b{color:var(--orange);font-weight:700;}
  .progress{display:flex;gap:10px;}.dot{width:12px;height:12px;border-radius:50%;background:var(--line);transition:.3s;}.dot.active{background:var(--orange);transform:scale(1.25);}.dot.done{background:var(--gray);}
  main{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;position:relative;}
- .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .35s,transform .35s,visibility .35s;overflow-y:auto;}
+ .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:safe center;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .35s,transform .35s,visibility .35s;overflow-y:auto;}
  .scene.show{opacity:1;visibility:visible;transform:translateY(0);}
  .hero-title{font-family:'Lusitana',serif;font-weight:700;line-height:.98;font-size:clamp(52px,10vw,120px);letter-spacing:-.01em;}.hero-title .q{color:var(--orange);}
  .hero-sub{margin-top:22px;color:var(--gray);font-size:clamp(16px,2vw,22px);max-width:44ch;font-weight:300;}
@@ -121,7 +121,7 @@ function tarjeta(l,head){
  if(cand.length<2){const ex=shuffle(CATALOGO.filter(x=>x.id!==l.id&&!cand.includes(x)));cand=cand.concat(ex).slice(0,2);}
  const alts=cand.map(a=>'<div class="alt" onclick="verLibro(\''+a.id+'\')"><div class="mini"></div><div class="alt-info"><strong>'+esc(a.titulo)+'</strong><span>'+esc(a.area||a.autor||'—')+'</span></div></div>').join('');
  return '<div class="result-head">'+head+'</div><div class="pick">'+portada(l)+'<div class="pick-body"><div class="badges"><span class="badge">'+NF[l.formato]+'</span><span class="badge soft">'+NT[l.tipo]+'</span>'+ab+ep+'</div><h2 class="pick-title">'+esc(l.titulo)+'</h2><div class="pick-author">'+esc(l.autor||'Autoría no especificada')+'</div><a class="avail" href="'+l.enlace+'" target="_blank" rel="noopener">Ver disponibilidad →</a><div class="alts"><h4>También podrían interesarte</h4><div class="alt-row">'+alts+'</div></div></div></div><div class="footer-actions">'+volverBtn()+'</div>';}
-function irResultado(){paso=5;scene(tarjeta(recomendar(),'Para ti, hoy, te recomendamos'));}
+function irResultado(){paso=5;var l=recomendar();if(!l){scene('<div class="result-head">No encontramos un libro con esos criterios ahora. Intenta con otra combinación.</div><div class="footer-actions"><button class="cta ghost" onclick="irInicio()">Volver a empezar</button></div>');return;}scene(tarjeta(l,'Para ti, hoy, te recomendamos'));}
 function verLibro(id){paso=5;scene(tarjeta(CATALOGO.find(x=>x.id===id),'Estás viendo'));}
 let CATALOGO=[];
 scene('<div class="loading">Cargando el catálogo…</div>');
